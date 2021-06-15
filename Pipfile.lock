@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "8001642ad9e3ec56e58304b843bebf8bdda5a953c4ee7bbd5d34b413b61a054e"
+            "sha256": "4ff3cf51d5d6b424cae45430ac2c8552998e2d62c52d58fc4b7f05d0aba1e7e0"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -87,6 +87,14 @@
             ],
             "index": "pypi",
             "version": "==2.1.8"
+        },
+        "graphene-sqlalchemy": {
+            "hashes": [
+                "sha256:2b1a9cf4ed44aec78140605f38061a79b51be5902400d10c3d19b2cf64046215",
+                "sha256:97ed52bc0d01d757df50d25b5bdd490a2327778d41223d4e084d38a239925e8e"
+            ],
+            "index": "pypi",
+            "version": "==2.3.0"
         },
         "graphql-core": {
             "hashes": [
@@ -399,6 +407,14 @@
                 "sha256:7357592bc7e881a95e0c2013b73326f704953301ab551fbc8133a6fadab84105"
             ],
             "version": "==1.6.1"
+        },
+        "singledispatch": {
+            "hashes": [
+                "sha256:0d428477703d8386eb6aeed6e522c9f22d49f4363cdf4ed6a2ba3dc276053e20",
+                "sha256:d5bb9405a4b8de48e36709238e8b91b4f6f300f81a5132ba2531a9a738eca391"
+            ],
+            "markers": "python_version >= '2.6'",
+            "version": "==3.6.2"
         },
         "six": {
             "hashes": [

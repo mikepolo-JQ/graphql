@@ -1,46 +1,38 @@
-from typing import Dict, List, Optional, Text, Union
+import os
 
-from pydantic.main import BaseModel
+from dynaconf import settings
+from sqlalchemy import *
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import backref, relationship, scoped_session, sessionmaker
 
+database_url = os.getenv("DATABASE_URL", settings.DATABASE_URL)
+engine = create_engine(database_url)
 
-class JsonApiSchema(BaseModel):
-    errors: Optional[List[Text]] = None
-    data: Union[List, Optional[Dict]] = None
+db_session = scoped_session(
+    sessionmaker(autocommit=False, autoflush=False, bind=engine)
+)
 
-
-class AuthorSchema(BaseModel):
-    id: int
-    name: str
-
-
-AuthorListSchema = List[AuthorSchema]
-
-
-class BookSchema(BaseModel):
-    id: int
-    title: str
-    text: str
-    # author_id: Optional[int] = None
-    # author_id: int
-    # content: str
-    # id: Optional[int] = None
-    # nr_likes: Optional[int] = 0
+Base = declarative_base()
+# We will need this for querying
+Base.query = db_session.query_property()
 
 
-BookListSchema = List[BookSchema]
+class Author(Base):
+    __tablename__ = "author"
+    id = Column(Integer(), primary_key=True)
+    name = Column(String)
+    books = relationship("Book", secondary="author_book", back_populates="authors")
 
 
-class AuthorListApiSchema(JsonApiSchema):
-    data: AuthorListSchema
+class Book(Base):
+    __tablename__ = "book"
+    id = Column(Integer(), primary_key=True)
+    title = Column(String)
+    text = Column(Text)
+    authors = relationship("Author", secondary="author_book", back_populates="books")
 
 
-class AuthorApiSchema(JsonApiSchema):
-    data: AuthorSchema
-
-
-class BookListApiSchema(JsonApiSchema):
-    data: BookListSchema
-
-
-class BookApiSchema(JsonApiSchema):
-    data: BookSchema
+class AuthorBook(Base):
+    __tablename__ = "author_book"
+    author_id = Column(Integer, ForeignKey("author.id"), primary_key=True)
+    book_id = Column(Integer, ForeignKey("book.id"), primary_key=True)

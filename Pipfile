@@ -12,6 +12,7 @@ graphene = "*"
 dynaconf = {version = "==3.1.2", extras = ["yaml"]}
 sqlalchemy = "*"
 psycopg2 = "*"
+graphene-sqlalchemy = "*"
 
 [dev-packages]
 

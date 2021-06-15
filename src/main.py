@@ -2,45 +2,65 @@ from typing import Optional
 
 import graphene
 from fastapi import FastAPI
+from graphene import relay
+from graphene_sqlalchemy import SQLAlchemyConnectionField, SQLAlchemyObjectType
 from starlette.graphql import GraphQLApp
 
-from src import schemas
-from src.db import get_all_books
-from src.schemas import BookSchema
+from src.schemas import Author as AuthorModel
+from src.schemas import Book as BookModel
 
 app = FastAPI()
 
 
+class Book(SQLAlchemyObjectType):
+    class Meta:
+        model = BookModel
+        interfaces = (relay.Node,)
+
+    authors = graphene.List(lambda: Author)
+
+
+class Author(SQLAlchemyObjectType):
+    class Meta:
+        model = AuthorModel
+        interfaces = (relay.Node,)
+
+    books = graphene.List(Book)
+
+
+class SearchResult(graphene.Union):
+    class Meta:
+        types = (Book, Author)
+
+
 class Query(graphene.ObjectType):
-    hello = graphene.String(name=graphene.String(default_value="stranger"))
-    car = graphene.List(graphene.String, number=graphene.Int(default_value=333))
+    node = relay.Node.Field()
 
-    def resolve_car(self, info, number):
-        return ["number is " + str(number)]
+    all_authors = SQLAlchemyConnectionField(Author.connection)
+    all_books = SQLAlchemyConnectionField(Book.connection)
+    search = graphene.List(SearchResult, q=graphene.String())
 
-    def resolve_hello(self, info, name):
-        return "Hello " + name
+    def resolve_search(self, info, **args):
+        q = args.get("q")  # Search query
+
+        # Get queries
+        bookdata_query = Book.get_query(info)
+        author_query = Author.get_query(info)
+
+        # Query Books
+        books = bookdata_query.filter((BookModel.title.contains(q))).all()
+        # (BookModel.isbn.contains(q)) |
+        # (BookModel.authors.any(AuthorModel.name.contains(q))
+
+        # Query Authors
+        authors = author_query.filter(AuthorModel.name.contains(q)).all()
+
+        return authors + books  # Combine lists
 
 
-app.add_route("/graphql", GraphQLApp(schema=graphene.Schema(query=Query)))
+schema = graphene.Schema(query=Query, types=[Book, Author, SearchResult])
 
-
-@app.get("/")
-async def all_books():
-    books = get_all_books()
-
-    books = [
-        schemas.BookSchema(
-            id=book.id,
-            text=book.text,
-            title=book.title,
-        )
-        for book in books
-    ]
-
-    response = schemas.BookListApiSchema(data=books)
-
-    return response
+app.add_route("/graphql", GraphQLApp(schema=schema))
 
 
 @app.get("/items/{item_id}")
