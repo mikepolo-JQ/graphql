@@ -8,6 +8,10 @@ fastapi = "*"
 uvicorn = {extras = ["standard"], version = "*"}
 isort = "*"
 black = "==20.8b1"
+graphene = "*"
+dynaconf = {version = "==3.1.2", extras = ["yaml"]}
+sqlalchemy = "*"
+psycopg2 = "*"
 
 [dev-packages]
 
