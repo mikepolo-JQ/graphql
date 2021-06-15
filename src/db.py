@@ -1,25 +1,26 @@
 import os
 from contextlib import closing
 from functools import wraps
-from typing import Callable
-from typing import List
-from typing import Optional
+from typing import Callable, List, Optional
 
 # from delorean import now
 from dynaconf import settings
-from sqlalchemy import Boolean, MetaData
-from sqlalchemy import Column, Table
-from sqlalchemy import create_engine
-from sqlalchemy import DateTime
-from sqlalchemy import ForeignKey
-from sqlalchemy import func
-from sqlalchemy import Integer
-from sqlalchemy import Text
+from sqlalchemy import (
+    Boolean,
+    Column,
+    DateTime,
+    ForeignKey,
+    Integer,
+    MetaData,
+    Table,
+    Text,
+    create_engine,
+    func,
+)
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import relationship, sessionmaker
 
-from src.schemas import BookSchema, BookApiSchema
+from src.schemas import BookApiSchema, BookSchema
 
 database_url = os.getenv("DATABASE_URL", settings.DATABASE_URL)
 engine = create_engine(database_url)
@@ -81,9 +82,7 @@ def create_post(session: Session, data: BookApiSchema) -> Book:
 
 @using_session
 def get_all_books(session: Session) -> List[Book]:
-    result = (
-        session.query(Book).group_by(Book.id).all()
-    )
+    result = session.query(Book).group_by(Book.id).all()
     return list(result)
 
 

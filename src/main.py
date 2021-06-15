@@ -1,9 +1,8 @@
 from typing import Optional
 
+import graphene
 from fastapi import FastAPI
 from starlette.graphql import GraphQLApp
-
-import graphene
 
 from src import schemas
 from src.db import get_all_books

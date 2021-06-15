@@ -1,8 +1,4 @@
-from typing import Dict
-from typing import List
-from typing import Optional
-from typing import Text
-from typing import Union
+from typing import Dict, List, Optional, Text, Union
 
 from pydantic.main import BaseModel
 
