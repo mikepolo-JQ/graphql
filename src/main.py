@@ -141,3 +141,8 @@ schema = graphene.Schema(
 )
 
 app.add_route("/graphql", GraphQLApp(schema=schema))
+
+
+@app.get('/')
+def ping():
+    return {'ping': 'pong'}
