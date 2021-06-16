@@ -71,10 +71,10 @@ jobs:
           paths:
             - ./selenium.jar
 
-      - run:
-          name: Performing release steps
-          command: |
-            make initdb release
+#      - run:
+#          name: Performing release steps
+#          command: |
+#            make initdb release
 
       - run:
           name: (Running Selenium)

@@ -27,7 +27,7 @@ run:
 .PHONY: run-prod
 run-prod:
 	$(call log, starting local web server)
-	$(RUN) gunicorn --config="$(DIR_SCRIPTS)/gunicorn.conf.py" project.wsgi:application
+	$(RUN) uvicorn src.main:app --reload
 
 
 .PHONY: venv
