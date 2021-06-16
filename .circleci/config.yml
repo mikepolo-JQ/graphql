@@ -37,10 +37,10 @@ jobs:
     steps:
       - checkout
 
-#      - run:
-#          name: (Waiting for Postgres to be ready)
-#          command: |
-#            make wait-for-db
+      - run:
+          name: (Waiting for Postgres to be ready)
+          command: |
+            make wait-for-db
 
       - postgres/install_postgres_client
 
@@ -71,10 +71,10 @@ jobs:
           paths:
             - ./selenium.jar
 
-#      - run:
-#          name: Performing release steps
-#          command: |
-#            make initdb release
+      - run:
+          name: Performing release steps
+          command: |
+            make initdb release
 
 #      - run:
 #          name: (Running Selenium)
