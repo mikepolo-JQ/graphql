@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Union
 
 import graphene
 from fastapi import FastAPI
@@ -38,13 +38,17 @@ class CreateAuthor(graphene.Mutation):
     class Arguments:
         name = graphene.String()
         id = graphene.Int()
+        bookList_id = graphene.List(graphene.ID)
 
     ok = graphene.Boolean()
     author = graphene.Field(lambda: Author)
 
-    def mutate(root, info, name, id):
+    def mutate(root, info, name, id, bookList_id):
         author = AuthorModel(name=name, id=id)
 
+        bookList = get_object_list(info, obj=Book, model=BookModel, list_id=bookList_id)
+
+        author.books = bookList
         db_session.add(author)
         db_session.commit()
 
@@ -56,18 +60,33 @@ class CreateBook(graphene.Mutation):
     class Arguments:
         title = graphene.String()
         id = graphene.Int()
+        authorList_id = graphene.List(graphene.ID)
 
     ok = graphene.Boolean()
     book = graphene.Field(lambda: Book)
 
-    def mutate(root, info, title, id):
+    def mutate(root, info, title, id, authorList_id):
         book = BookModel(title=title, id=id)
 
+        authorList = get_object_list(info, obj=Author, model=AuthorModel, list_id=authorList_id)
+
+        book.authors = authorList
         db_session.add(book)
         db_session.commit()
 
         ok = True
         return CreateBook(book=book, ok=ok)
+
+
+def get_object_list(info, obj: Union[Author, Book], model: [AuthorModel, BookModel], list_id: list):
+    objectList = []
+    obj_query = obj.get_query(info)
+
+    for obj_id in list_id:
+        _obj = obj_query.filter(model.id == obj_id).first()
+        objectList.append(_obj)
+        
+    return objectList
 
 
 class Mutations(graphene.ObjectType):
@@ -102,9 +121,8 @@ class Query(graphene.ObjectType):
         author_query = Author.get_query(info)
 
         # Query Books
-        books = bookdata_query.filter((BookModel.title.contains(q))).all()
-        # (BookModel.isbn.contains(q)) |
-        # (BookModel.authors.any(AuthorModel.name.contains(q))
+        books = bookdata_query.filter(BookModel.title.contains(q) |
+                                        BookModel.authors.any(AuthorModel.name.contains(q))).all()
 
         # Query Authors
         authors = author_query.filter(AuthorModel.name.contains(q)).all()
