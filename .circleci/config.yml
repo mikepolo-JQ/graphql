@@ -85,7 +85,7 @@ jobs:
           command: make run-prod
           background: true
 
-#      - run:
-#          name: Performing Tests
-#          command: |
-#            make test
+      - run:
+          name: Performing Tests
+          command: |
+            make test
