@@ -26,7 +26,7 @@ author_book = Table(
 
 class Author(Base):
     __tablename__ = "author"
-    id = Column(Integer(), primary_key=True)
+    id = Column(Integer(), primary_key=True, autoincrement=True)
     name = Column(String)
     books = relationship("Book", secondary="author_book", back_populates="authors")
 
