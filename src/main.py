@@ -1,4 +1,4 @@
-from typing import Optional, Union
+from typing import Union
 
 import graphene
 from fastapi import FastAPI
@@ -68,7 +68,9 @@ class CreateBook(graphene.Mutation):
     def mutate(root, info, title, id, authorList_id):
         book = BookModel(title=title, id=id)
 
-        authorList = get_object_list(info, obj=Author, model=AuthorModel, list_id=authorList_id)
+        authorList = get_object_list(
+            info, obj=Author, model=AuthorModel, list_id=authorList_id
+        )
 
         book.authors = authorList
         db_session.add(book)
@@ -78,14 +80,16 @@ class CreateBook(graphene.Mutation):
         return CreateBook(book=book, ok=ok)
 
 
-def get_object_list(info, obj: Union[Author, Book], model: [AuthorModel, BookModel], list_id: list):
+def get_object_list(
+    info, obj: Union[Author, Book], model: [AuthorModel, BookModel], list_id: list
+):
     objectList = []
     obj_query = obj.get_query(info)
 
     for obj_id in list_id:
         _obj = obj_query.filter(model.id == obj_id).first()
         objectList.append(_obj)
-        
+
     return objectList
 
 
@@ -121,8 +125,10 @@ class Query(graphene.ObjectType):
         author_query = Author.get_query(info)
 
         # Query Books
-        books = bookdata_query.filter(BookModel.title.contains(q) |
-                                        BookModel.authors.any(AuthorModel.name.contains(q))).all()
+        books = bookdata_query.filter(
+            BookModel.title.contains(q)
+            | BookModel.authors.any(AuthorModel.name.contains(q))
+        ).all()
 
         # Query Authors
         authors = author_query.filter(AuthorModel.name.contains(q)).all()
@@ -135,8 +141,3 @@ schema = graphene.Schema(
 )
 
 app.add_route("/graphql", GraphQLApp(schema=schema))
-
-
-@app.get("/items/{item_id}")
-def read_item(item_id: int, q: Optional[str] = None):
-    return {"item_id": item_id, "q": q}

@@ -13,15 +13,14 @@ db_session = scoped_session(
 )
 
 Base = declarative_base()
-# We will need this for querying
 Base.query = db_session.query_property()
 
 
 author_book = Table(
-    "author_book", Base.metadata,
-    Column("author_id", Integer, ForeignKey(
-        "author.id"), primary_key=True),
-    Column("book_id", Integer, ForeignKey("book.id"), primary_key=True)
+    "author_book",
+    Base.metadata,
+    Column("author_id", Integer, ForeignKey("author.id"), primary_key=True),
+    Column("book_id", Integer, ForeignKey("book.id"), primary_key=True),
 )
 
 
@@ -38,9 +37,3 @@ class Book(Base):
     title = Column(String)
     text = Column(Text)
     authors = relationship("Author", secondary="author_book", back_populates="books")
-
-
-# class AuthorBook(Base):
-#     __tablename__ = "author_book"
-#     author_id = Column(Integer, ForeignKey("author.id"), primary_key=True)
-#     book_id = Column(Integer, ForeignKey("book.id"), primary_key=True)

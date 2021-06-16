@@ -30,18 +30,6 @@ run-prod:
 	$(RUN) gunicorn --config="$(DIR_SCRIPTS)/gunicorn.conf.py" project.wsgi:application
 
 
-.PHONY: sh
-sh:
-	$(call log, starting Python shell)
-	$(PYTHON) src/manage.py shell
-
-
-.PHONY: su
-su:
-	$(call log, create superuser)
-	$(PYTHON) src/manage.py createsuperuser
-
-
 .PHONY: venv
 venv:
 	$(call log, installing packages)
@@ -58,27 +46,6 @@ venv-dev:
 pycharm:
 	$(call log, setting pycharm up)
 	$(PYTHON) $(DIR_SCRIPTS)/setup_pycharm.py
-
-
-.PHONY: db
-db: resetdb
-	$(call log, setting db up)
-
-
-.PHONY: data
-data: static migrate
-	$(call log, preparing data)
-
-
-.PHONY: static
-static:
-	$(call log, collecting static)
-	$(PYTHON) src/manage.py collectstatic --noinput
-
-
-.PHONY: resetdb
-resetdb: dropdb createdb migrations migrate
-	$(call log, resetting db to initial state)
 
 
 .PHONY: dropdb
@@ -103,15 +70,3 @@ createdb:
 		--host=localhost \
 		--dbname=postgres \
 		--command="CREATE DATABASE \"$(shell $(PYTHON) $(DIR_SCRIPTS)/get_db_name.py)\";"
-
-
-.PHONY: migrations
-migrations:
-	$(call log, generating migrations)
-	$(PYTHON) src/manage.py makemigrations
-
-
-.PHONY: migrate
-migrate:
-	$(call log, applying migrations)
-	$(PYTHON) src/manage.py migrate
