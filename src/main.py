@@ -8,6 +8,7 @@ from starlette.graphql import GraphQLApp
 
 from src.schemas import Author as AuthorModel
 from src.schemas import Book as BookModel
+from src.schemas import db_session
 
 app = FastAPI()
 
@@ -33,15 +34,68 @@ class SearchResult(graphene.Union):
         types = (Book, Author)
 
 
+class CreateAuthor(graphene.Mutation):
+    class Arguments:
+        name = graphene.String()
+        id = graphene.Int()
+
+    ok = graphene.Boolean()
+    author = graphene.Field(lambda: Author)
+
+    def mutate(root, info, name, id):
+        author = AuthorModel(name=name, id=id)
+
+        db_session.add(author)
+        db_session.commit()
+
+        ok = True
+        return CreateAuthor(author=author, ok=ok)
+
+
+class CreateBook(graphene.Mutation):
+    class Arguments:
+        title = graphene.String()
+        id = graphene.Int()
+
+    ok = graphene.Boolean()
+    book = graphene.Field(lambda: Book)
+
+    def mutate(root, info, title, id):
+        book = BookModel(title=title, id=id)
+
+        db_session.add(book)
+        db_session.commit()
+
+        ok = True
+        return CreateBook(book=book, ok=ok)
+
+
+class Mutations(graphene.ObjectType):
+    create_author = CreateAuthor.Field()
+    create_book = CreateBook.Field()
+
+
 class Query(graphene.ObjectType):
     node = relay.Node.Field()
 
     all_authors = SQLAlchemyConnectionField(Author.connection)
     all_books = SQLAlchemyConnectionField(Book.connection)
+    author = graphene.Field(Author)
+    book = graphene.Field(Book)
     search = graphene.List(SearchResult, q=graphene.String())
 
-    def resolve_search(self, info, **args):
-        q = args.get("q")  # Search query
+    def resolve_author(self, info, **kw):
+        query = Author.get_query(info)
+        _id = kw["id"]
+        return query.get(_id)
+
+    def resolve_book(self, info, **kw):
+        query = Book.get_query(info)
+        _id = kw["id"]
+        return query.get(_id)
+
+    def resolve_search(self, info, **kw):
+        q = kw.get("q")  # Search query
 
         # Get queries
         bookdata_query = Book.get_query(info)
@@ -58,7 +112,9 @@ class Query(graphene.ObjectType):
         return authors + books  # Combine lists
 
 
-schema = graphene.Schema(query=Query, types=[Book, Author, SearchResult])
+schema = graphene.Schema(
+    query=Query, types=[Book, Author, SearchResult], mutation=Mutations
+)
 
 app.add_route("/graphql", GraphQLApp(schema=schema))
 
