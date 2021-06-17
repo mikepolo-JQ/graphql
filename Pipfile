@@ -4,15 +4,16 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-fastapi = "*"
-uvicorn = {extras = ["standard"], version = "*"}
-isort = "*"
 black = "==20.8b1"
-graphene = "*"
 dynaconf = {version = "==3.1.2", extras = ["yaml"]}
-sqlalchemy = "*"
-psycopg2 = "*"
+fastapi = "*"
+graphene = "*"
 graphene-sqlalchemy = "*"
+isort = "*"
+psycopg2 = "*"
+pytest = "*"
+sqlalchemy = "*"
+uvicorn = {extras = ["standard"], version = "*"}
 
 [dev-packages]
 

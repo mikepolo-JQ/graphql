@@ -1,32 +1,18 @@
-from typing import Union
-
 import graphene
+import uvicorn
 from fastapi import FastAPI
 from graphene import relay
-from graphene_sqlalchemy import SQLAlchemyConnectionField, SQLAlchemyObjectType
+from graphene_sqlalchemy import SQLAlchemyConnectionField
 from starlette.graphql import GraphQLApp
 
-from src.schemas import Author as AuthorModel
-from src.schemas import Book as BookModel
-from src.schemas import db_session
+from db import Base, engine
+from models import Author as AuthorModel
+from models import Book as BookModel
+from schemas import Author, Book, CreateAuthor, CreateBook, DeleteAuthors, DeleteBooks
+
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
-
-
-class Book(SQLAlchemyObjectType):
-    class Meta:
-        model = BookModel
-        interfaces = (relay.Node,)
-
-    authors = graphene.List(lambda: Author)
-
-
-class Author(SQLAlchemyObjectType):
-    class Meta:
-        model = AuthorModel
-        interfaces = (relay.Node,)
-
-    books = graphene.List(Book)
 
 
 class SearchResult(graphene.Union):
@@ -34,68 +20,11 @@ class SearchResult(graphene.Union):
         types = (Book, Author)
 
 
-class CreateAuthor(graphene.Mutation):
-    class Arguments:
-        name = graphene.String()
-        id = graphene.Int()
-        bookList_id = graphene.List(graphene.ID)
-
-    ok = graphene.Boolean()
-    author = graphene.Field(lambda: Author)
-
-    def mutate(root, info, name, id, bookList_id):
-        author = AuthorModel(name=name, id=id)
-
-        bookList = get_object_list(info, obj=Book, model=BookModel, list_id=bookList_id)
-
-        author.books = bookList
-        db_session.add(author)
-        db_session.commit()
-
-        ok = True
-        return CreateAuthor(author=author, ok=ok)
-
-
-class CreateBook(graphene.Mutation):
-    class Arguments:
-        title = graphene.String()
-        id = graphene.Int()
-        authorList_id = graphene.List(graphene.ID)
-
-    ok = graphene.Boolean()
-    book = graphene.Field(lambda: Book)
-
-    def mutate(root, info, title, id, authorList_id):
-        book = BookModel(title=title, id=id)
-
-        authorList = get_object_list(
-            info, obj=Author, model=AuthorModel, list_id=authorList_id
-        )
-
-        book.authors = authorList
-        db_session.add(book)
-        db_session.commit()
-
-        ok = True
-        return CreateBook(book=book, ok=ok)
-
-
-def get_object_list(
-    info, obj: Union[Author, Book], model: [AuthorModel, BookModel], list_id: list
-):
-    objectList = []
-    obj_query = obj.get_query(info)
-
-    for obj_id in list_id:
-        _obj = obj_query.filter(model.id == obj_id).first()
-        objectList.append(_obj)
-
-    return objectList
-
-
 class Mutations(graphene.ObjectType):
     create_author = CreateAuthor.Field()
     create_book = CreateBook.Field()
+    delete_authors = DeleteAuthors.Field()
+    delete_books = DeleteBooks.Field()
 
 
 class Query(graphene.ObjectType):
@@ -103,8 +32,8 @@ class Query(graphene.ObjectType):
 
     all_authors = SQLAlchemyConnectionField(Author.connection)
     all_books = SQLAlchemyConnectionField(Book.connection)
-    author = graphene.Field(Author)
-    book = graphene.Field(Book)
+    author = graphene.Field(Author, id=graphene.ID())
+    book = graphene.Field(Book, id=graphene.ID())
     search = graphene.List(SearchResult, q=graphene.String())
 
     def resolve_author(self, info, **kw):
@@ -118,22 +47,19 @@ class Query(graphene.ObjectType):
         return query.get(_id)
 
     def resolve_search(self, info, **kw):
-        q = kw.get("q")  # Search query
+        q = kw.get("q")
 
-        # Get queries
         bookdata_query = Book.get_query(info)
         author_query = Author.get_query(info)
 
-        # Query Books
         books = bookdata_query.filter(
             BookModel.title.contains(q)
             | BookModel.authors.any(AuthorModel.name.contains(q))
         ).all()
 
-        # Query Authors
         authors = author_query.filter(AuthorModel.name.contains(q)).all()
 
-        return authors + books  # Combine lists
+        return authors + books
 
 
 schema = graphene.Schema(
@@ -143,6 +69,10 @@ schema = graphene.Schema(
 app.add_route("/graphql", GraphQLApp(schema=schema))
 
 
-@app.get('/')
+@app.get("/")
 def ping():
-    return {'ping': 'pong'}
+    return {"ping": "pong"}
+
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="127.0.0.1", port=8000)

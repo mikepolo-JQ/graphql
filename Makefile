@@ -4,17 +4,15 @@ include ./Makefile.in.mk
 .PHONY: format
 format:
 	$(call log, reorganizing imports & formatting code)
-	$(RUN) isort --virtual-env="$(DIR_VENV)" "$(DIR_SRC)" "$(DIR_SCRIPTS)"
-#	"$(DIR_TESTS)"
-	$(RUN) black "$(DIR_SRC)" "$(DIR_SCRIPTS)"
-#	"$(DIR_TESTS)"
+#	$(RUN) isort --virtual-env="$(DIR_VENV)" "$(DIR_SRC)" "$(DIR_SCRIPTS)" "$(DIR_TESTS)"
+	$(RUN) black "$(DIR_SRC)" "$(DIR_SCRIPTS)" "$(DIR_TESTS)"
 
 
 .PHONY: test
 test:
 	$(call log, running tests)
 	$(RUN) pytest
-	$(RUN) isort --virtual-env="$(DIR_VENV)" --check-only "$(DIR_SRC)" "$(DIR_SCRIPTS)" "$(DIR_TESTS)"
+#	$(RUN) isort --virtual-env="$(DIR_VENV)" --check-only "$(DIR_SRC)" "$(DIR_SCRIPTS)" "$(DIR_TESTS)"
 	$(RUN) black --check "$(DIR_SRC)" "$(DIR_SCRIPTS)" "$(DIR_TESTS)"
 
 
