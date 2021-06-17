@@ -8,7 +8,6 @@
 .tests_artifacts/
 .venv
 __pycache__/
-db.sqlite3
 tests/**/*.html
 tests/**/*.png
 venv/
