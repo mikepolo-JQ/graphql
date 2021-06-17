@@ -8,7 +8,7 @@ from starlette.graphql import GraphQLApp
 from db import Base, engine
 from models import Author as AuthorModel
 from models import Book as BookModel
-from schemas import Author, Book, CreateAuthor, CreateBook, DeleteAuthors
+from schemas import Author, Book, CreateAuthor, CreateBook, DeleteAuthors, DeleteBooks
 
 Base.metadata.create_all(bind=engine)
 
@@ -24,6 +24,7 @@ class Mutations(graphene.ObjectType):
     create_author = CreateAuthor.Field()
     create_book = CreateBook.Field()
     delete_authors = DeleteAuthors.Field()
+    delete_books = DeleteBooks.Field()
 
 
 class Query(graphene.ObjectType):

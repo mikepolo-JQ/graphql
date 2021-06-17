@@ -1,33 +1,47 @@
-import pytest
-from graphene.test import Client
+import os
 
-from main import schema
-from tests.utils import create_author, delete_authors, get_book, search
+import pytest
+
+from tests.utils import (
+    create_author,
+    create_book,
+    delete_authors,
+    delete_books,
+    get_author,
+    get_book,
+    search,
+)
+
+nonce = os.urandom(8).hex()
 
 test_id = 103
-test_name = "Greenwell"
-test_title = "title321"
-test_list = []
+test_name = f"test_name_{nonce}"
+test_title = f"test_title_{nonce}"
+test_list = [
+    test_id,
+]
 
 
 @pytest.mark.functional
-def test_author_creation_and_deletion():
-    author = create_author(id=test_id, book_list=test_list, name=test_name)
+def test_creation_and_deletion():
+    # test_creation
+    author = create_author(id=test_id, book_list=[], name=test_name)
     assert author["name"] == test_name
 
-    books_names = set()
-    for pid in test_list:
-        book = get_book(id=pid)
-        books_names.add(book["title"])
+    book = create_book(id=test_id, author_list=test_list, title=test_title)
+    assert book["title"] == test_title
+    assert book["authors"][0]["name"] == test_name
 
-    author_booksList = author["books"]
+    author = get_author(id=test_id)
+    assert author["books"][0]["title"] == test_title
 
-    for book in author_booksList:
-        assert book["title"] in books_names
-
+    # test_deletion
     removed = delete_authors([test_id])
-
     assert removed[0]["name"] == test_name
+    assert len(removed) == 1
+
+    removed = delete_books([test_id])
+    assert removed[0]["title"] == test_title
     assert len(removed) == 1
 
 

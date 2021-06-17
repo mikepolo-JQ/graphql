@@ -109,6 +109,31 @@ class CreateBook(graphene.Mutation):
             return CreateBook(ok=ok)
 
 
+class DeleteBooks(graphene.Mutation):
+    class Arguments:
+        bookList_id = graphene.List(graphene.ID)
+
+    ok = graphene.Boolean()
+    removed = graphene.List(Book)
+
+    def mutate(root, info, bookList_id):
+        ok = True
+
+        bookList = get_object_list(info, obj=Book, model=BookModel, list_id=bookList_id)
+        removed = []
+
+        for book in bookList:
+            try:
+                db_session.delete(book)
+                db_session.commit()
+                removed.append(book)
+            except:
+                db_session.close()
+                ok = False
+
+        return DeleteBooks(ok=ok, removed=removed)
+
+
 def get_object_list(
     info, obj: Union[Author, Book], model: [AuthorModel, BookModel], list_id: list
 ):
