@@ -151,34 +151,6 @@ query{
 }
 ```
 
-## op supports:
-- *==* 
-- *!=* 
-- *>=* 
-- *<=* 
-- *>* 
-- *<* 
-- *starts* 
-- *ends* 
-- *contains* 
-- *in* 
-- *notin* 
-- *any* 
-
-
-# Mutation example
-```gql
- createUser(input:{name: "cc",password: "dd"}){
-    ok
-    output{
-      id
-      dbId
-      name
-    }
-    message
-  }
-```
-
 ## Run Tests
 
 Just run
