@@ -28,11 +28,11 @@ def create_author(id: int, book_list: list, name: str) -> dict:
     return author
 
 
-def create_book(id: int, author_list: list, title: str) -> dict:
+def create_book(id: int, author_list: list, title: str, text: str) -> dict:
     client = Client(schema=schema)
     executed = client.execute(
         "mutation Mutation {"
-        + f'createBook(id:{id}, authorListId:{author_list}, title:"{title}")'
+        + f'createBook(id:{id}, authorListId:{author_list}, title:"{title}", text:"{text}")'
         + """{
             book {
                 title
@@ -85,9 +85,6 @@ def get_author(id: id):
     )
     author = executed["data"]["author"]
     return author
-
-
-print(get_author(103))
 
 
 def delete_authors(list_id: list) -> list:
@@ -149,3 +146,23 @@ def search(query: str) -> dict:
     )
     search_result = executed["data"]["search"]
     return search_result
+
+
+def get_author_list():
+    client = Client(schema=schema)
+    executed = client.execute(
+        """{
+        allAuthors{
+        edges{
+          node{
+            name
+            books{
+              title
+            }
+          }
+        }
+      }
+    }"""
+    )
+    author_list = executed["data"]["allAuthors"]["edges"]
+    return author_list

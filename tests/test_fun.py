@@ -8,6 +8,7 @@ from tests.utils import (
     delete_authors,
     delete_books,
     get_author,
+    get_author_list,
     get_book,
     search,
 )
@@ -23,17 +24,26 @@ test_list = [
 
 
 @pytest.mark.functional
-def test_creation_and_deletion():
+def test_creation_mapping_deletion():
     # test_creation
     author = create_author(id=test_id, book_list=[], name=test_name)
     assert author["name"] == test_name
 
-    book = create_book(id=test_id, author_list=test_list, title=test_title)
+    book = create_book(id=test_id, author_list=test_list, title=test_title, text="")
     assert book["title"] == test_title
     assert book["authors"][0]["name"] == test_name
 
     author = get_author(id=test_id)
     assert author["books"][0]["title"] == test_title
+
+    # test_mapping
+    mapping = False
+    authors = get_author_list()
+    for author in authors:
+        if author["node"]["name"] == test_name:
+            mapping = True
+            break
+    assert mapping
 
     # test_deletion
     removed = delete_authors([test_id])

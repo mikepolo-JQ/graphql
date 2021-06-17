@@ -84,13 +84,14 @@ class CreateBook(graphene.Mutation):
         title = graphene.String()
         id = graphene.Int()
         authorList_id = graphene.List(graphene.ID)
+        text = graphene.String()
 
     ok = graphene.Boolean()
     book = graphene.Field(lambda: Book)
 
-    def mutate(root, info, title, id, authorList_id):
+    def mutate(root, info, title, id, authorList_id, text):
         ok = True
-        book = BookModel(title=title, id=id)
+        book = BookModel(title=title, id=id, text=text)
 
         authorList = get_object_list(
             info, obj=Author, model=AuthorModel, list_id=authorList_id
