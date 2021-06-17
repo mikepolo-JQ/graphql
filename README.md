@@ -135,22 +135,6 @@ mutation Mutation{
 }
 ```
 
-OR 
-support more expr
-```gql
-query{
-  userList(filters:[{key: "name",op: "==", val: "a"}]){
-    edges{
-      node{
-        name
-        id
-        dbId
-      }
-    }
-  }
-}
-```
-
 ## Run Tests
 
 Just run
