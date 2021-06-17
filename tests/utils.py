@@ -2,9 +2,10 @@ from graphene.test import Client
 
 from main import schema
 
+client = Client(schema=schema)
+
 
 def create_author(id: int, book_list: list, name: str) -> dict:
-    client = Client(schema=schema)
     executed = client.execute(
         "mutation Mutation {"
         + f'createAuthor(id:{id}, bookListId:{book_list}, name:"{name}")'
@@ -29,7 +30,7 @@ def create_author(id: int, book_list: list, name: str) -> dict:
 
 
 def create_book(id: int, author_list: list, title: str, text: str) -> dict:
-    client = Client(schema=schema)
+
     executed = client.execute(
         "mutation Mutation {"
         + f'createBook(id:{id}, authorListId:{author_list}, title:"{title}", text:"{text}")'
@@ -51,7 +52,6 @@ def create_book(id: int, author_list: list, title: str, text: str) -> dict:
 
 
 def get_book(id: id) -> dict:
-    client = Client(schema=schema)
 
     executed = client.execute(
         "{"
@@ -69,7 +69,6 @@ def get_book(id: id) -> dict:
 
 
 def get_author(id: id):
-    client = Client(schema=schema)
 
     executed = client.execute(
         "{"
@@ -88,7 +87,6 @@ def get_author(id: id):
 
 
 def delete_authors(list_id: list) -> list:
-    client = Client(schema=schema)
 
     executed = client.execute(
         "mutation Mutation {"
@@ -107,7 +105,6 @@ def delete_authors(list_id: list) -> list:
 
 
 def delete_books(list_id: list) -> list:
-    client = Client(schema=schema)
 
     executed = client.execute(
         "mutation Mutation {"
@@ -126,7 +123,7 @@ def delete_books(list_id: list) -> list:
 
 
 def search(query: str) -> dict:
-    client = Client(schema=schema)
+
     executed = client.execute(
         "{"
         f'search(q:"{query}")'
@@ -149,7 +146,7 @@ def search(query: str) -> dict:
 
 
 def get_author_list():
-    client = Client(schema=schema)
+
     executed = client.execute(
         """{
         allAuthors{
