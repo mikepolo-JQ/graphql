@@ -7,7 +7,7 @@ from tests.utils import create_author, delete_authors, get_book, search
 test_id = 103
 test_name = "Greenwell"
 test_title = "title321"
-test_list = [1, 2, 3]
+test_list = []
 
 
 @pytest.mark.functional
